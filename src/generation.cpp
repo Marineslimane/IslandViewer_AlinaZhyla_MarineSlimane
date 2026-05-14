@@ -12,17 +12,82 @@ std::vector<glm::vec2> generate2DPositions([[maybe_unused]] PointsGenerationPara
 
     positions.reserve(1000);
     // Naive random generation
-    for (int i {0}; i < 1000; ++i)
+   /*  for (int i {0}; i < 1000; ++i)
     {
         positions.emplace_back(
             static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX),
             static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX)
         );
     }
-
+ */
     // TODO(student): implement Poisson disk sampling to replace the above naive random generation
     // points output should be in [0..1] range, where (0,0) is one corner of the terrain and (1,1) is the opposite corner, so they can be easily scaled to terrain size and sampled from heightmap.
+   
+    int cell_size {params.r/sqrt(2)};
+    std::vector<glm::vec2> grid {}; // active list
+    grid.reserve(1000);
+
+    // randomly choosing the first point and adding it to the output list positions
+    glm::vec2 first_point {static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX), static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX)};
+    positions.emplace_back(first_point);
+    // and to the grid 
+    grid.emplace_back(first_point);
+
+   while (!grid.empty()) // while the active list is not empty
+   {
+        // choosing a random point from the active list : 
+        int random_i {static_cast<int>(GetRandomValue(0, 1000))};
+        glm::vec2 current_point {grid[random_i]};
+        int wrong_distance {0}; // counts how many potential new_points do not follow the rule of the min distance when generating them inside the loop
+
+        for (int i {0}; i < params.k < i++)
+        {
+            // generate new point around current_point (within the annulus surrounding the point)
+            glm::vec2 new_point {generateRandomPointAround(current_point, params.r)};
+            bool keep_point;
+
+            for (glm::vec2 point : positions) 
+            {
+                if (sqrt((new_point.x - current_point.x)*(new_point.x  - current_point.x) + (new_point.y - current_point.y)*(new_point.y - current_point.y)) < params.r) // if the distance between this new point and others is lower than the minimal distance between points
+                {
+                    !keep_point;
+                    wrong_distance++;
+                    break; // this new_point cannot exist
+                }
+            }
+
+            if (!keep_point) // if the point couldn't exist
+            {
+                break; // try to generate another point within the annulus
+            }
+            // if the distance between new_point and all other points is of at least params.r : 
+            positions.emplace_back(new_point);
+            grid.emplace_back(new_point);
+        }
+
+        if (wrong_distance == params.k) // after k tries, no generated new point follows the rules
+        {
+            grid.pop_back(); // current_point is deleted from the active list
+        }
+   }
+
     return positions;
+}
+
+glm::vec2 generateRandomPointAround(glm::vec2 point, float r)
+{
+    float r1 = static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX);
+    float r2 = static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX);
+
+    float radius = r * (r1 + 1.f);
+    float angle  = 2.f * M_PI * r2;
+
+    glm::vec2 new_point = {
+        point.x + radius * cosf(angle),
+        point.y + radius * sinf(angle)
+    };
+
+    return new_point;
 }
 
 void generateObjectsPositions(AppContext& context) {

@@ -12,6 +12,9 @@ struct ImageGenerationParameters {
 
 struct PointsGenerationParameters {
     // TODO(student): add parameters for points generation (ex: poisson disk radius, etc).
+    float r {0.05}; // Poisson disk radius, represents the minimal distance between 2 points (2 samples)
+    int k {30}; // maximum number of attempts before a candidate is rejected in the Poisson algorithm
+    int max_points {1000}; // maximum number of points that can be generated in the end on the map
 };
 
 struct AppContext {

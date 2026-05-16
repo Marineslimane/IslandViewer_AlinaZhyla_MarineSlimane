@@ -22,3 +22,12 @@ BONUS (améliorations supplémentaires ou plus avancées, originalité, etc) : /
 Qualité du code : /2
 Rapport : /2
 Total : /21 qui sera ramené à 20 pour la notation finale
+
+
+
+
+# DIFFICULTÉS : 
+- la gestion des bords pour le poisson disk sampling -> des points sortent de la map
+
+# CE QU'ON AURAIT FAIT DIFFÉREMMENT : 
+- Poisson Disk Sampling : avoir voulu implémenter l'algorithme en se basant seulement sur le papier de recherche et l'article au lieu de directement regarder une vidéo qui m'aurait fait gagner beaucoup de temps à essayer de comprendre sans réelle visualisation 

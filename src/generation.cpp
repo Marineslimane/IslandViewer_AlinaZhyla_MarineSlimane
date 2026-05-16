@@ -79,16 +79,17 @@ bool isValid(const glm::vec2 candidate, const float cellSize, const float r, con
 }
 
 std::vector<glm::vec2> generate2DPositions([[maybe_unused]] PointsGenerationParameters const& params) {
+    std::vector<glm::vec2> positions {}; // our result 
+    
     // Naive random generation
-   /*  for (int i {0}; i < params.max_points; ++i)
+/*     for (int i {0}; i < params.max_points; ++i)
     {
         positions.emplace_back(
             static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX),
             static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX)
         );
-    }
-    */
-
+    } */
+    
     // TODO(student): implement Poisson disk sampling to replace the above naive random generation
     // points output should be in [0..1] range, where (0,0) is one corner of the terrain and (1,1) is the opposite corner, so they can be easily scaled to terrain size and sampled from heightmap.
    
@@ -99,7 +100,6 @@ std::vector<glm::vec2> generate2DPositions([[maybe_unused]] PointsGenerationPara
     std::vector<std::vector<int>> grid(h, std::vector<int>(w, -1)); // (nb of rows, (nb of columns, values))
     // -1 in a cell signifies no sample is in it, else, grid[y][x] stores the index of the sample located in that cell
 
-    std::vector<glm::vec2> positions {}; // our result 
     positions.reserve(params.max_points); // params.max_points is the maximum potential number of points that can be generated, in the end, on the map
     std::vector<int> active_list {}; // stores potential candidates
 

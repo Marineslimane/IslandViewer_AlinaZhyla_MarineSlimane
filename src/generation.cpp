@@ -14,8 +14,8 @@ glm::vec2 generateRandomPointAround(const glm::vec2 point, const float r)
     float r1 = static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX);
     float r2 = static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX);
 
-//     float radius = r * (r1 + 1.f);
-//     float angle  = 2.f * M_PI * r2;
+    float radius = r * (r1 + 1.f);
+    float angle  = 2.f * M_PI * r2;
 
     glm::vec2 candidate = {
         point.x + radius * cosf(angle),

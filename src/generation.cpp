@@ -14,8 +14,8 @@ glm::vec2 generateRandomPointAround(const glm::vec2 point, const float r)
     float r1 = static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX);
     float r2 = static_cast<float>(GetRandomValue(0, INT_MAX)) / static_cast<float>(INT_MAX);
 
-    float radius = r * (r1 + 1.f);
-    float angle  = 2.f * M_PI * r2;
+//     float radius = r * (r1 + 1.f);
+//     float angle  = 2.f * M_PI * r2;
 
     glm::vec2 candidate = {
         point.x + radius * cosf(angle),
@@ -214,8 +214,12 @@ void generateHeightmap(AppContext& context) {
     context.heightmapImage = GenImageFromNoiseFunction<float>(resolution, resolution, PIXELFORMAT_UNCOMPRESSED_R32,
         [&](glm::vec2 const& p)->float {
             // TODO(student): implement stack based noise and island mask
+            auto noiseFunction = [&] (glm::vec2 const& position) -> float {
+                return perlinNoiseSeeded(position, context.imageGenerationParameters.noiseSeed);
+            };
 
-            return (perlinNoiseSeeded(p * context.imageGenerationParameters.noiseScale, context.imageGenerationParameters.noiseSeed) * 0.5f + 0.5f);
+            return (octaveNoise(p * context.imageGenerationParameters.noiseScale, noiseFunction) * 0.5f + 0.5f);
+            // return (perlinNoiseSeeded(p * context.imageGenerationParameters.noiseScale, context.imageGenerationParameters.noiseSeed) * 0.5f + 0.5f);
         });
 
     // exemple conversion from heightmap to color image

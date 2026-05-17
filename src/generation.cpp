@@ -162,14 +162,24 @@ void generateObjectsPositions(AppContext& context) {
     context.objectPositions.reserve(positions.size());
     for (glm::vec2 const& p : positions)
     {
+        // TODO(student): extension - filter positions by sampled height range.
+        float h = sampleHeightmap(context, p.x, p.y);
+
+        bool const isWater {h < 0.3f};
+        bool const isMountain {h > 0.9f}; // > 0.5 is grass according to TransformImage
+
+        if (isWater || isMountain)
+        {
+            continue; // no point in water or at the top of mountains
+        }
+
         context.objectPositions.emplace_back(
             p.x, // x
             p.y, // y
             // sample height from heightmap for each point (asuming positions are normalized in [0..1] range)
-            sampleHeightmap(context, p.x, p.y)
+            h // z
         );
     }
-    // TODO(student): extension - filter positions by sampled height range.
 }
 
 float sampleHeightmap(AppContext const& context, float u, float v)

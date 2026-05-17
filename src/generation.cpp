@@ -218,7 +218,7 @@ void generateHeightmap(AppContext& context) {
                 return perlinNoiseSeeded(position, context.imageGenerationParameters.noiseSeed);
             };
 
-            return (octaveNoise(p * context.imageGenerationParameters.noiseScale, noiseFunction) * 0.5f + 0.5f);
+            return (octaveNoise(p * context.imageGenerationParameters.noiseScale,p, noiseFunction) * 0.5f + 0.5f);
             // return (perlinNoiseSeeded(p * context.imageGenerationParameters.noiseScale, context.imageGenerationParameters.noiseSeed) * 0.5f + 0.5f);
         });
 

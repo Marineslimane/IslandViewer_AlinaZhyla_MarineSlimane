@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <iostream>
 
 namespace
 {
@@ -58,20 +59,31 @@ float perlinNoiseSeeded(glm::vec2 const &position, int seed)
     return glm::perlin(position + cachedOffset);
 }
 
-float octaveNoise(glm::vec2 const &position, std::function<float(glm::vec2 const &)> noiseFunction)
+float radialMask(glm::vec2 const &position)
+{
+    glm::vec2 center = {0.5f, 0.5f};
+    float d = glm::distance(position, center);
+    float p = 1-d*4;
+    p = glm::clamp(p, -1.f, 1.f);
+    // std::cout << "p=(" << position.x << ", " << position.y << ") d=" << d << " mask=" << p << "\n";
+    return p;
+}
+
+float octaveNoise(glm::vec2 const &position, glm::vec2 const &normalP, std::function<float(glm::vec2 const &)> noiseFunction)
 {
     // TODO(student): Implement octave/fractal noise accumulation.
     float H = 1.0f;
     float G = exp2(-H);
     float f = 1.0;
     float a = 1.0;
-    float t = 0.0;
+    float t = 0;
     for (int i = 0; i < 3; i++)
     {
         t += a * noiseFunction(f * position);
         f *= 2.0;
         a *= G;
     }
+    t += radialMask(normalP);
     return t;
     // Temporary fallback return directly from the provided noise function for testing.
     // return noiseFunction(position);

@@ -61,29 +61,28 @@ float perlinNoiseSeeded(glm::vec2 const &position, int seed)
 
 float radialMask(glm::vec2 const &position)
 {
-    glm::vec2 center = {0.5f, 0.5f};
-    float d = glm::distance(position, center);
-    float p = 1-d*4;
-    p = glm::clamp(p, -1.f, 1.f);
-    // std::cout << "p=(" << position.x << ", " << position.y << ") d=" << d << " mask=" << p << "\n";
+    glm::vec2 center = {0.5f, 0.5f};//center of the map (supposing its size is 1)
+    float d = glm::distance(position, center); //distance between the pixel and the center
+    float p = 1-d*4; //put the value to 1 and inverse it
+    p = glm::clamp(p, -1.f, 1.f);//keep the value between -1 and 1
     return p;
 }
 
 float octaveNoise(glm::vec2 const &position, glm::vec2 const &normalP, std::function<float(glm::vec2 const &)> noiseFunction)
 {
     // TODO(student): Implement octave/fractal noise accumulation.
-    float H = 1.0f;
-    float G = exp2(-H);
-    float f = 1.0;
-    float a = 1.0;
-    float t = 0;
-    for (int i = 0; i < 5; i++)
+    float H = 1.0f; //smoothness of the land
+    float G = exp2(-H);// amplitude decay
+    float f = 1.0; float f = 1.0f; //  frequency
+    float a = 1.0;//  amplitude
+    float t = 0;//  noise value
+    for (int i = 0; i < 5; i++) //i= number of octaves
     {
-        t += a * noiseFunction(f * position);
-        f *= 2.0;
-        a *= G;
+        t += a * noiseFunction(f * position);//apply noise map
+        f *= 2.0; // increase frequency
+        a *= G; //increase amplitude
     }
-    t += radialMask(normalP);
+    t += radialMask(normalP); //add the mask to give the land a form of an island
     return t;
     // Temporary fallback return directly from the provided noise function for testing.
     // return noiseFunction(position);

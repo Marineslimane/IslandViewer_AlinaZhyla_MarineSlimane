@@ -40,7 +40,10 @@ struct AppContext {
     // A simple cube mesh and material we use to draw objects on the terrain.
     Mesh cube {};
     Material cubeMaterial {};
-    float cubeScale { 0.1f };
+    float cubeScale { 0.1f }; 
+    
+    Model objectModel {};
+
 
     // Parameters for object positions generation
     PointsGenerationParameters pointsGenerationParameters;

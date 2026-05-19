@@ -5,6 +5,8 @@
 #include "app.hpp"
 #include "draw.hpp"
 #include "generation.hpp"
+#include <filesystem>
+#include "utils/pathUtils.hpp"
 
 int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -27,10 +29,19 @@ int main() {
 
     AppContext context {};
 
-    context.cube = GenMeshCube(1.0f, 1.0f, 1.0f);
+    // object definition : 
+    /* context.cube = GenMeshCube(1.0f, 1.0f, 1.0f);
     context.cubeMaterial = LoadMaterialDefault();
-    context.cubeMaterial.maps[MATERIAL_MAP_DIFFUSE].color = RED;
-    
+    context.cubeMaterial.maps[MATERIAL_MAP_DIFFUSE].color = RED; 
+    */
+    std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/forestTree.gltf") };
+    context.objectModel = LoadModel(modelPath.string().c_str());
+    if (context.objectModel.meshCount == 0) 
+    {
+        TraceLog(LOG_ERROR, "Failed to load model!");
+    }
+    TraceLog(LOG_INFO, "Working dir: %s", std::filesystem::current_path().string().c_str());
+
     // Define our custom camera to look into our 3d world
     context.camera = {
         .position={ 18.0f, 21.0f, 18.0f },

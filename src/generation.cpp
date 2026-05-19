@@ -272,3 +272,8 @@ return Color{
         context.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = context.texture;
     }
 }
+
+void forestBiome(AppContext& context)
+{
+    // TODO
+}

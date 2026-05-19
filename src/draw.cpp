@@ -8,21 +8,7 @@
 #include "raylib.h"
 #include "raymath.h"
 
-void draw3DScene(AppContext& context) {
-    ClearBackground(RAYWHITE);
-    
-    BeginMode3D(context.camera);
-
-    Matrix const terrainCentering { getTerrainCenteringMatrix(context) };
-    Vector3 const terrainCenterOffset { terrainCentering.m12, terrainCentering.m13, terrainCentering.m14 };
-
-    DrawModel(context.model, terrainCenterOffset, 1.0f, WHITE);
-    drawCubes(context, terrainCentering);
-    DrawGrid(20, 1.0f);
-
-    EndMode3D();
-}
-
+// drawing objects : 
 void drawCubes(AppContext const& context, Matrix const& terrainCentering)
 {
     if (context.objectPositions.empty()) {
@@ -44,10 +30,67 @@ void drawCubes(AppContext const& context, Matrix const& terrainCentering)
     }
 }
 
+void drawObjects(AppContext const& context, Matrix const& terrainCentering)
+{
+    if (context.objectPositions.empty() || context.objectModel.meshCount == 0)
+        return;
+
+    for (glm::vec3 const& pos : context.objectPositions)
+    {
+        Matrix const objectTranslation { MatrixTranslate(
+            pos.x * context.terrainSize.x,
+            pos.z * context.terrainSize.y,  // no half-height offset needed unless your model pivot is centered
+            pos.y * context.terrainSize.z
+        )};
+
+        Matrix const centeredTranslation { MatrixMultiply(objectTranslation, terrainCentering) };
+        Matrix const scale { MatrixScale(context.cubeScale, context.cubeScale, context.cubeScale) };
+        Matrix const transform { MatrixMultiply(scale, centeredTranslation) };
+
+        // each mesh of the model with its own material
+        for (int i = 0; i < context.objectModel.meshCount; i++) 
+        {
+            DrawMesh(
+                context.objectModel.meshes[i],
+                context.objectModel.materials[context.objectModel.meshMaterial[i]],
+                transform
+            );
+        }
+    }
+}
+
+void draw3DScene(AppContext& context) {
+    ClearBackground(RAYWHITE);
+    
+    BeginMode3D(context.camera);
+
+    Matrix const terrainCentering { getTerrainCenteringMatrix(context) };
+    Vector3 const terrainCenterOffset { terrainCentering.m12, terrainCentering.m13, terrainCentering.m14 };
+
+    DrawModel(context.model, terrainCenterOffset, 1.0f, WHITE);
+    // for cubes : 
+    // drawCubes(context, terrainCentering);
+    // for 3D objects :
+    drawObjects(context, terrainCentering);
+    DrawGrid(20, 1.0f);
+
+    EndMode3D();
+}
+
 void drawImGui(AppContext& context) {
     if(ImGui::Button("Generate random positions")) {
         generateObjectsPositions(context);
     }
+
+    // biome selection
+    /* if (ImGui::CollapsingHeader("Biome selection", ImGuiTreeNodeFlags_DefaultOpen)) 
+    {
+        if(ImGui::Button("Forest")) 
+        {
+            forestBiome(context);
+        }
+    } 
+    */
 
     if (ImGui::CollapsingHeader("objects", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::SliderFloat("Cube Scale", &context.cubeScale, 0.01f, 1.0f);

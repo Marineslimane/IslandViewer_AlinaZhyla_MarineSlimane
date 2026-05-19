@@ -24,7 +24,10 @@ void unload(AppContext& context) {
         context.mesh = {};
     }
 
-    if (context.cubeMaterial.shader.id > 0) {
+    // added 3D objects : 
+    
+    // cubes : 
+    /* if (context.cubeMaterial.shader.id > 0) {
         UnloadMaterial(context.cubeMaterial);
         context.cubeMaterial = {};
     }
@@ -32,6 +35,14 @@ void unload(AppContext& context) {
     if (context.cube.vertexCount > 0) {
         UnloadMesh(context.cube);
         context.cube = {};
+    } 
+    */
+
+    // others : 
+    if (context.objectModel.meshCount > 0) // if the model successfully loaded
+    {
+        UnloadModel(context.objectModel);
+        context.objectModel = {};
     }
 }
 

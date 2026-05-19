@@ -77,7 +77,7 @@ float octaveNoise(glm::vec2 const &position, glm::vec2 const &normalP, std::func
     float f = 1.0;
     float a = 1.0;
     float t = 0;
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 5; i++)
     {
         t += a * noiseFunction(f * position);
         f *= 2.0;

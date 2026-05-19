@@ -73,7 +73,7 @@ float octaveNoise(glm::vec2 const &position, glm::vec2 const &normalP, std::func
     // TODO(student): Implement octave/fractal noise accumulation.
     float H = 1.0f; //smoothness of the land
     float G = exp2(-H);// amplitude decay
-    float f = 1.0; float f = 1.0f; //  frequency
+    float f = 1.0; //  frequency
     float a = 1.0;//  amplitude
     float t = 0;//  noise value
     for (int i = 0; i < 5; i++) //i= number of octaves

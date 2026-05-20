@@ -233,37 +233,26 @@ void generateHeightmap(AppContext& context) {
             // return (perlinNoiseSeeded(p * context.imageGenerationParameters.noiseScale, context.imageGenerationParameters.noiseSeed) * 0.5f + 0.5f);
         });
 
-        //colors depending on height
-struct ColorStop { float height; Color color; };
-std::vector<ColorStop> colors = {
-    { -0.5f, color_from({ 49, 51, 84 }) },  // deep water
-    { 0.1f, color_from({ 101, 133, 166 }) },  // water
-    { 0.3f, color_from({ 238, 214, 175 }) },  // sand
-    { 0.5f, color_from({ 45, 107, 49  }) },  // grass
-    { 0.7f, color_from({ 45, 107, 49  }) },  // grass
-    { 1.0f, color_from({ 223, 237, 236 }) },  // snow
-};
-
     // exemple conversion from heightmap to color image
     context.image = TransformImage<float, Color>(context.heightmapImage, [&](float const& v, int const, int const) {
         
-    for (int i = 0; i + 1 < (int)colors.size(); i++)
+    for (int i = 0; i + 1 < (int)context.colors.size(); i++)
     {
-        if (v <= colors[i + 1].height)
+        if (v <= context.colors[i + 1].height)
         {
-             float t = std::lerp(0.0f, 1.0f, (v - colors[i].height) / (colors[i + 1].height - colors[i].height)); //lerp to calculate each height needed 
+             float t = std::lerp(0.0f, 1.0f, (v - context.colors[i].height) / (context.colors[i + 1].height - context.colors[i].height)); //lerp to calculate each height needed 
               t = t * t;//reduce gradient
 
     // interpolate RGB channels between the two colors
 return Color{
-    (unsigned char)std::lerp(colors[i].color.r, colors[i+1].color.r, t),
-    (unsigned char)std::lerp(colors[i].color.g, colors[i+1].color.g, t),
-    (unsigned char)std::lerp(colors[i].color.b, colors[i+1].color.b, t),
+    (unsigned char)std::lerp(context.colors[i].color.r, context.colors[i+1].color.r, t),
+    (unsigned char)std::lerp(context.colors[i].color.g, context.colors[i+1].color.g, t),
+    (unsigned char)std::lerp(context.colors[i].color.b, context.colors[i+1].color.b, t),
     255
 };
         }
     }
-    return colors.back().color;
+    return context.colors.back().color;
         
     }, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
 

@@ -99,14 +99,36 @@ void drawImGui(AppContext &context)
     }
 
     // biome selection
-    /* if (ImGui::CollapsingHeader("Biome selection", ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader("Biome selection", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        if(ImGui::Button("Forest"))
+        if (ImGui::Button("Forest"))
         {
-            forestBiome(context);
+            context.colors = {
+                {-0.5f, color_from({49, 51, 84})},   // deep water
+                {0.1f, color_from({101, 133, 166})}, // water
+                {0.3f, color_from({238, 214, 175})}, // sand
+                {0.5f, color_from({45, 107, 49})},   // grass
+                {0.7f, color_from({45, 107, 49})},   // grass
+                {1.0f, color_from({223, 237, 236})}, // snow
+            };
+            generateHeightmap(context);
+            regenerateMeshFromImage(context); // regenerate the colors
+        }
+
+                if (ImGui::Button("Desert"))
+        {
+            context.colors = {
+                {-0.5f, color_from({21, 97, 109})},   // deep water
+                {0.1f, color_from({100, 223, 223})}, // water
+                {0.3f, color_from({255, 236, 209})}, // sand
+                {0.5f, color_from({255, 125, 0})},   // grass
+                {0.7f, color_from({255, 125, 0})},   // grass
+                {1.0f, color_from({120, 41, 15})}, // snow
+            };
+            generateHeightmap(context);
+            regenerateMeshFromImage(context); // regenerate the colors
         }
     }
-    */
 
     if (ImGui::CollapsingHeader("objects", ImGuiTreeNodeFlags_DefaultOpen))
     {

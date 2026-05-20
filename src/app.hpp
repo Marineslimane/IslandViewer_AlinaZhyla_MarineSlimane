@@ -4,6 +4,8 @@
 #include "glm/glm.hpp"
 #include <vector>
 
+#include "utils/raylibUtils.hpp"
+
 struct ImageGenerationParameters {
     int noiseSeed { 0 };
     float noiseScale { 4.0f };
@@ -17,6 +19,9 @@ struct PointsGenerationParameters {
     int max_points {1000}; // maximum number of points that can be generated in the end on the map
 };
 
+        //colors depending on height
+struct ColorStop { float height; Color color; };
+
 struct AppContext {
     Camera camera {};
 
@@ -28,6 +33,16 @@ struct AppContext {
 
     // The generated texture from the image, stored here so we can easily bind it when generating the model.
     Texture2D texture {};
+
+    //colors for of the map
+    std::vector<ColorStop> colors = {
+    { -0.5f, color_from({ 49, 51, 84 }) },  // deep water
+    { 0.1f, color_from({ 101, 133, 166 }) },  // water
+    { 0.3f, color_from({ 238, 214, 175 }) },  // sand
+    { 0.5f, color_from({ 45, 107, 49  }) },  // grass
+    { 0.7f, color_from({ 45, 107, 49  }) },  // grass
+    { 1.0f, color_from({ 223, 237, 236 }) },  // snow
+};
 
     glm::vec3 terrainSize { 16.0f, 5.0f, 16.0f };
 

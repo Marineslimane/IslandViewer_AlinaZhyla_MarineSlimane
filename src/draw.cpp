@@ -115,18 +115,73 @@ void drawImGui(AppContext &context)
             regenerateMeshFromImage(context); // regenerate the colors
         }
 
-                if (ImGui::Button("Desert"))
+        if (ImGui::Button("Desert"))
         {
             context.colors = {
-                {-0.5f, color_from({21, 97, 109})},   // deep water
-                {0.1f, color_from({100, 223, 223})}, // water
+                {-0.5f, color_from({33, 118, 196})}, // deep water
+                {0.1f, color_from({66, 197, 245})},  // water
                 {0.3f, color_from({255, 236, 209})}, // sand
-                {0.5f, color_from({255, 125, 0})},   // grass
-                {0.7f, color_from({255, 125, 0})},   // grass
-                {1.0f, color_from({120, 41, 15})}, // snow
+                {0.5f, color_from({255, 125, 0})},   // ground
+                {0.7f, color_from({255, 125, 0})},   // ground
+                {1.0f, color_from({120, 41, 15})},   // peak
             };
             generateHeightmap(context);
             regenerateMeshFromImage(context); // regenerate the colors
+        }
+
+        if (ImGui::Button("Snowy mountain"))
+        {
+            context.colors = {
+                {-0.5f, color_from({33, 157, 199})}, // deep water
+                {0.1f, color_from({140, 230, 255})}, // water
+                {0.3f, color_from({247, 253, 255})}, // sand
+                {0.5f, color_from({140, 230, 255})}, // ground
+                {0.7f, color_from({191, 219, 247})}, // ground
+                {1.0f, color_from({255, 255, 255})}, // peak
+            };
+            generateHeightmap(context);
+            regenerateMeshFromImage(context); // regenerate the colors
+        }
+
+        if (ImGui::Button("Candy kingdom"))
+        {
+            context.colors = {
+                {-0.5f, color_from({56, 176, 80})}, // deep water
+                {0.1f, color_from({141, 224, 158})}, // water
+                {0.3f, color_from({226, 21, 141})}, // sand
+                {0.5f, color_from({253, 119, 173})}, // ground
+                {0.7f, color_from({242, 181, 212})}, // ground
+                {1.0f, color_from({250, 205, 228})}, // peak
+            };
+            generateHeightmap(context);
+            regenerateMeshFromImage(context); // regenerate the colors
+        }
+    }
+
+    if (ImGui::CollapsingHeader("Color picker"))
+    {
+        static const char *height[] = {
+            "Deep water", "Water", "Sand", "Ground 1", "Ground 2", "Snow"};
+
+        for (int i = 0; i < (int)context.colors.size(); i++)
+        {
+            float col[3] = {context.colors[i].color.r / 255.f,
+                            context.colors[i].color.g / 255.f,
+                            context.colors[i].color.b / 255.f};
+
+            if (ImGui::ColorEdit3(height[i], col))
+            {
+                context.colors[i].color.r = (col[0] * 255);
+                context.colors[i].color.g = (col[1] * 255);
+                context.colors[i].color.b = (col[2] * 255);
+            }
+        }
+
+        if (ImGui::Button("Regenerate Terrain"))
+        {
+            generateHeightmap(context);
+            regenerateMeshFromImage(context);
+            generateObjectsPositions(context);
         }
     }
 

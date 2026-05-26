@@ -59,7 +59,6 @@ struct AppContext {
     
     Model objectModel {};
 
-
     // Parameters for object positions generation
     PointsGenerationParameters pointsGenerationParameters;
 

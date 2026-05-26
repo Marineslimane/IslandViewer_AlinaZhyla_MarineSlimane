@@ -8,6 +8,9 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include <filesystem> // for 3D models paths
+#include "utils/pathUtils.hpp" // for 3D models paths
+
 // drawing objects :
 void drawCubes(AppContext const &context, Matrix const &terrainCentering)
 {
@@ -103,6 +106,10 @@ void drawImGui(AppContext &context)
     {
         if (ImGui::Button("Forest"))
         {
+            // choice of 3D model :
+            std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/forestTree/forestTree.gltf") };
+            context.objectModel = LoadModel(modelPath.string().c_str());
+
             context.colors = {
                 {-0.5f, color_from({49, 51, 84})},   // deep water
                 {0.1f, color_from({101, 133, 166})}, // water
@@ -112,11 +119,17 @@ void drawImGui(AppContext &context)
                 {1.0f, color_from({223, 237, 236})}, // snow
             };
             generateHeightmap(context);
-            regenerateMeshFromImage(context); // regenerate the colors
+            regenerateMeshFromImage(context); // regenerates the colors
+            generateObjectsPositions(context); // refreshes 3D models
         }
 
-                if (ImGui::Button("Desert"))
+        if (ImGui::Button("Desert"))
         {
+            // choice of 3D model :
+            std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/palmTree/palmTree.gltf") };
+            context.objectModel = LoadModel(modelPath.string().c_str());
+            context.cubeScale = 0.01;
+
             context.colors = {
                 {-0.5f, color_from({21, 97, 109})},   // deep water
                 {0.1f, color_from({100, 223, 223})}, // water
@@ -126,7 +139,8 @@ void drawImGui(AppContext &context)
                 {1.0f, color_from({120, 41, 15})}, // snow
             };
             generateHeightmap(context);
-            regenerateMeshFromImage(context); // regenerate the colors
+            regenerateMeshFromImage(context); // regenerates the colors
+            generateObjectsPositions(context); // refreshes 3D models
         }
     }
 

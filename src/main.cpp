@@ -29,13 +29,17 @@ int main() {
 
     AppContext context {};
 
-    // object definition : 
+    // OBJECT DEFINITION : 
+
     /* context.cube = GenMeshCube(1.0f, 1.0f, 1.0f);
     context.cubeMaterial = LoadMaterialDefault();
     context.cubeMaterial.maps[MATERIAL_MAP_DIFFUSE].color = RED; 
     */
-    std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/forestTree.gltf") };
+   
+    // default biome is forest :
+    std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/forestTree/forestTree.gltf") };
     context.objectModel = LoadModel(modelPath.string().c_str());
+
     if (context.objectModel.meshCount == 0) 
     {
         TraceLog(LOG_ERROR, "Failed to load model!");

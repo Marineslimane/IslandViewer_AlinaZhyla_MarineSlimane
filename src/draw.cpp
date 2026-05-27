@@ -109,7 +109,7 @@ void drawImGui(AppContext &context)
             // choice of 3D model :
             std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/forestTree/forestTree.gltf") };
             context.objectModel = LoadModel(modelPath.string().c_str());
-
+            context.cubeScale = 0.1; // rescaling
             context.colors = {
                 {-0.5f, color_from({49, 51, 84})},   // deep water
                 {0.1f, color_from({101, 133, 166})}, // water
@@ -121,14 +121,15 @@ void drawImGui(AppContext &context)
             generateHeightmap(context);
             regenerateMeshFromImage(context); // regenerates the colors
             generateObjectsPositions(context); // refreshes 3D models
+            drawObjects(context, getTerrainCenteringMatrix(context));
         }
 
         if (ImGui::Button("Desert"))
         {
             // choice of 3D model :
-            std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/palmTree/palmTree.gltf") };
+            std::filesystem::path modelPath {pathUtils::make_absolute_path("resources/3DModels/desertTree/desertTree.gltf")};
             context.objectModel = LoadModel(modelPath.string().c_str());
-            context.cubeScale = 0.01;
+            context.cubeScale = 0.1; // rescaling
 
             context.colors = {
                 {-0.5f, color_from({33, 118, 196})}, // deep water

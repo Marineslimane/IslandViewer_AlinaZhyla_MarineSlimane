@@ -309,7 +309,7 @@ void drawRaylibUI(AppContext &context)
 {
     int screenWidth{GetScreenWidth()};
 
-    float wanted_size{400.f};
+    float wanted_size{200.f};
     float scale_factor{wanted_size / std::max(context.texture.width, context.texture.height)};
     float const preview_x{screenWidth - wanted_size - 20.f};
     float const preview_y{20.f};

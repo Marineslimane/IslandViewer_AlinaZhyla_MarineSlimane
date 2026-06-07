@@ -37,10 +37,20 @@ int main() {
     */
    
     // default biome is forest :
-    std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/forestTree/forestTree.gltf") };
-    context.objectModel = LoadModel(modelPath.string().c_str());
+    std::filesystem::path forestPath { pathUtils::make_absolute_path("resources/3DModels/forestTree/forestTree.gltf") };
+    context.objectModels[BiomeModel::ForestTree] = LoadModel(forestPath.string().c_str());
+    context.objectScales[BiomeModel::ForestTree] = 0.1f; // rescaling
 
-    if (context.objectModel.meshCount == 0) 
+    std::filesystem::path rockPath { pathUtils::make_absolute_path("resources/3DModels/desertRock/rock.obj") };
+    context.objectModels[BiomeModel::Rock] = LoadModel(rockPath.string().c_str());
+    context.objectScales[BiomeModel::Rock] = 0.5f; // rescaling
+    // loading textures
+    Texture2D texRock = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/desertRock/textures/Material_baseColor.png").string().c_str());
+    if (context.objectModels[BiomeModel::Rock].materialCount > 0)
+        SetMaterialTexture(&context.objectModels[BiomeModel::Rock].materials[0], MATERIAL_MAP_DIFFUSE, texRock);
+
+
+    if (context.objectModels[BiomeModel::ForestTree].meshCount == 0) 
     {
         TraceLog(LOG_ERROR, "Failed to load model!");
     }

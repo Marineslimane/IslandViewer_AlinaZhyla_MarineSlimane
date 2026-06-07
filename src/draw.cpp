@@ -21,12 +21,12 @@ void drawCubes(AppContext const &context, Matrix const &terrainCentering)
 
     float const cubeHalfHeight{0.5f * context.cubeScale};
 
-    for (glm::vec3 const &pos : context.objectPositions)
+    for (Object const &obj : context.objectPositions)
     {
         Matrix const objectTranslation{MatrixTranslate(
-            pos.x * context.terrainSize.x,
-            pos.z * context.terrainSize.y + cubeHalfHeight,
-            pos.y * context.terrainSize.z)};
+            obj.position.x * context.terrainSize.x,
+            obj.position.z * context.terrainSize.y + cubeHalfHeight,
+            obj.position.y * context.terrainSize.z)};
         Matrix const centeredTranslation{MatrixMultiply(objectTranslation, terrainCentering)};
         Matrix const scale{MatrixScale(context.cubeScale, context.cubeScale, context.cubeScale)};
         Matrix const transform{MatrixMultiply(scale, centeredTranslation)};
@@ -36,26 +36,41 @@ void drawCubes(AppContext const &context, Matrix const &terrainCentering)
 
 void drawObjects(AppContext const &context, Matrix const &terrainCentering)
 {
-    if (context.objectPositions.empty() || context.objectModel.meshCount == 0)
+    if (context.objectPositions.empty() || context.objectModels.empty())
         return;
 
-    for (glm::vec3 const &pos : context.objectPositions)
+    for (Object const &obj : context.objectPositions)
     {
         Matrix const objectTranslation{MatrixTranslate(
-            pos.x * context.terrainSize.x,
-            pos.z * context.terrainSize.y, // no half-height offset needed unless your model pivot is centered
-            pos.y * context.terrainSize.z)};
+            obj.position.x * context.terrainSize.x,
+            obj.position.z * context.terrainSize.y, // no half-height offset needed unless your model pivot is centered
+            obj.position.y * context.terrainSize.z)};
 
         Matrix const centeredTranslation{MatrixMultiply(objectTranslation, terrainCentering)};
-        Matrix const scale{MatrixScale(context.cubeScale, context.cubeScale, context.cubeScale)};
+
+        float modelScale = 1.0f; // default value
+        if (context.objectScales.contains(obj.modelType))
+            modelScale = context.objectScales.at(obj.modelType);
+        modelScale *= context.cubeScale;
+
+        Matrix const scale{MatrixScale(modelScale, modelScale, modelScale)};
         Matrix const transform{MatrixMultiply(scale, centeredTranslation)};
 
+        // model corresponding to the type of the object
+        auto it = context.objectModels.find(obj.modelType);
+        if (it == context.objectModels.end()) // if no model corresponds to the type
+        {
+            continue;
+        }
+
+        Model const &model = it->second;
+
         // each mesh of the model with its own material
-        for (int i = 0; i < context.objectModel.meshCount; i++)
+        for (int i = 0; i < model.meshCount; i++)
         {
             DrawMesh(
-                context.objectModel.meshes[i],
-                context.objectModel.materials[context.objectModel.meshMaterial[i]],
+                model.meshes[i],
+                model.materials[model.meshMaterial[i]],
                 transform);
         }
     }
@@ -106,10 +121,23 @@ void drawImGui(AppContext &context)
     {
         if (ImGui::Button("Forest"))
         {
+            context.currentBiome = Biome::Forest; // setting biome
+
             // choice of 3D model :
             std::filesystem::path modelPath { pathUtils::make_absolute_path("resources/3DModels/forestTree/forestTree.gltf") };
-            context.objectModel = LoadModel(modelPath.string().c_str());
-            context.cubeScale = 0.1; // rescaling
+            context.objectModels[BiomeModel::ForestTree] = LoadModel(modelPath.string().c_str());
+            context.objectScales[BiomeModel::ForestTree] = 0.1f; // rescaling
+
+            // rock
+            std::filesystem::path rockPath {pathUtils::make_absolute_path("resources/3DModels/desertRock/rock.obj")};
+            context.objectModels[BiomeModel::Rock] = LoadModel(rockPath.string().c_str());
+            context.objectScales[BiomeModel::Rock] = 1.5f; // rescaling
+
+            // loading textures
+            Texture2D texRock = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/desertRock/textures/Material_baseColor.png").string().c_str());
+            if (context.objectModels[BiomeModel::Rock].materialCount > 0)
+                SetMaterialTexture(&context.objectModels[BiomeModel::Rock].materials[0], MATERIAL_MAP_DIFFUSE, texRock);
+
             context.colors = {
                 {-0.5f, color_from({49, 51, 84})},   // deep water
                 {0.1f, color_from({101, 133, 166})}, // water
@@ -125,11 +153,33 @@ void drawImGui(AppContext &context)
         }
 
         if (ImGui::Button("Desert"))
-        {
+        {            
+            context.currentBiome = Biome::Desert; // setting biome
+
             // choice of 3D model :
-            std::filesystem::path modelPath {pathUtils::make_absolute_path("resources/3DModels/desertTree/desertTree.gltf")};
-            context.objectModel = LoadModel(modelPath.string().c_str());
-            context.cubeScale = 0.1; // rescaling
+            // palmTree
+            std::filesystem::path treePath {pathUtils::make_absolute_path("resources/3DModels/desertTree/palmTree.obj")};
+            context.objectModels[BiomeModel::PalmTree] = LoadModel(treePath.string().c_str());
+            context.objectScales[BiomeModel::PalmTree] = 1.5f; // rescaling
+
+            // loading textures
+            Texture2D texLeaf = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/desertTree/textures/mIdrTreePalmLeaf_baseColor.png").string().c_str());
+            Texture2D texTrunk = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/desertTree/textures/mIdrTreePalmTrunk_baseColor.png").string().c_str());
+
+            if (context.objectModels[BiomeModel::PalmTree].materialCount > 0)
+                SetMaterialTexture(&context.objectModels[BiomeModel::PalmTree].materials[0], MATERIAL_MAP_DIFFUSE, texLeaf);
+            if (context.objectModels[BiomeModel::PalmTree].materialCount > 1)
+                SetMaterialTexture(&context.objectModels[BiomeModel::PalmTree].materials[1], MATERIAL_MAP_DIFFUSE, texTrunk);
+            // rock
+            std::filesystem::path rockPath {pathUtils::make_absolute_path("resources/3DModels/desertRock/rock.obj")};
+            context.objectModels[BiomeModel::Rock] = LoadModel(rockPath.string().c_str());
+            context.objectScales[BiomeModel::Rock] = 0.75f; // rescaling
+
+            // loading textures
+            Texture2D texRock = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/desertRock/textures/Material_baseColor.png").string().c_str());
+            if (context.objectModels[BiomeModel::Rock].materialCount > 0)
+                SetMaterialTexture(&context.objectModels[BiomeModel::Rock].materials[0], MATERIAL_MAP_DIFFUSE, texRock);
+
 
             context.colors = {
                 {-0.5f, color_from({33, 118, 196})}, // deep water
@@ -139,6 +189,7 @@ void drawImGui(AppContext &context)
                 {0.7f, color_from({255, 125, 0})},   // ground
                 {1.0f, color_from({120, 41, 15})},   // peak
             };
+
             generateHeightmap(context);
             regenerateMeshFromImage(context); // regenerates the colors
             generateObjectsPositions(context); // refreshes 3D models
@@ -146,6 +197,27 @@ void drawImGui(AppContext &context)
 
         if (ImGui::Button("Snowy mountain"))
         {
+            context.currentBiome = Biome::SnowyMountain; // setting biome
+
+            // snowman
+            std::filesystem::path snowmanPath {pathUtils::make_absolute_path("resources/3DModels/snowman/snowman.obj")};
+            context.objectModels[BiomeModel::Snowman] = LoadModel(snowmanPath.string().c_str());
+            context.objectScales[BiomeModel::Snowman] = 1.25f; // rescaling
+
+            // loading textures
+            Texture2D texSnowman = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/snowman/textures/winter_snowman_baseColor.png").string().c_str());
+            if (context.objectModels[BiomeModel::Snowman].materialCount > 0)
+                SetMaterialTexture(&context.objectModels[BiomeModel::Snowman].materials[0], MATERIAL_MAP_DIFFUSE, texSnowman);
+            // house
+            std::filesystem::path housePath {pathUtils::make_absolute_path("resources/3DModels/house/house.obj")};
+            context.objectModels[BiomeModel::House] = LoadModel(housePath.string().c_str());
+            context.objectScales[BiomeModel::House] = 0.25f; // rescaling
+
+            // loading textures
+            Texture2D texHouse = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/house/textures/Medieval_baseColor.png").string().c_str());
+            if (context.objectModels[BiomeModel::House].materialCount > 0)
+                SetMaterialTexture(&context.objectModels[BiomeModel::House].materials[0], MATERIAL_MAP_DIFFUSE, texHouse);
+
             context.colors = {
                 {-0.5f, color_from({33, 157, 199})}, // deep water
                 {0.1f, color_from({140, 230, 255})}, // water
@@ -154,12 +226,37 @@ void drawImGui(AppContext &context)
                 {0.7f, color_from({191, 219, 247})}, // ground
                 {1.0f, color_from({255, 255, 255})}, // peak
             };
+
             generateHeightmap(context);
             regenerateMeshFromImage(context); // regenerate the colors
+            generateObjectsPositions(context); // refreshes 3D models
         }
 
         if (ImGui::Button("Candy kingdom"))
         {
+            context.currentBiome = Biome::CandyKingdom; // setting biome
+
+            // cake
+            std::filesystem::path cakePath {pathUtils::make_absolute_path("resources/3DModels/cake/cake.obj")};
+            context.objectModels[BiomeModel::Cake] = LoadModel(cakePath.string().c_str());
+            context.objectScales[BiomeModel::Cake] = 0.05f; // rescaling
+
+            // loading textures
+            Texture2D texCake = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/cake/textures/Mdl_37_Mtl_m_fg_cake_baseColor.png").string().c_str());
+            if (context.objectModels[BiomeModel::Cake].materialCount > 0)
+                SetMaterialTexture(&context.objectModels[BiomeModel::Cake].materials[0], MATERIAL_MAP_DIFFUSE, texCake);
+
+            
+            // candy
+            std::filesystem::path candyPath {pathUtils::make_absolute_path("resources/3DModels/candy/candy.obj")};
+            context.objectModels[BiomeModel::Candy] = LoadModel(candyPath.string().c_str());
+            context.objectScales[BiomeModel::Candy] = 0.05f; // rescaling
+
+            // loading textures
+            Texture2D texCandy = LoadTexture(pathUtils::make_absolute_path("resources/3DModels/candy/textures/Mdl_39_Mtl_m_fg_candy_baseColor.png").string().c_str());
+            if (context.objectModels[BiomeModel::Candy].materialCount > 0)
+                SetMaterialTexture(&context.objectModels[BiomeModel::Candy].materials[0], MATERIAL_MAP_DIFFUSE, texCandy);
+    
             context.colors = {
                 {-0.5f, color_from({56, 176, 80})}, // deep water
                 {0.1f, color_from({141, 224, 158})}, // water
@@ -168,8 +265,10 @@ void drawImGui(AppContext &context)
                 {0.7f, color_from({242, 181, 212})}, // ground
                 {1.0f, color_from({250, 205, 228})}, // peak
             };
+
             generateHeightmap(context);
             regenerateMeshFromImage(context); // regenerate the colors
+            generateObjectsPositions(context); // refreshes 3D models
         }
     }
 
@@ -202,7 +301,7 @@ void drawImGui(AppContext &context)
 
     if (ImGui::CollapsingHeader("objects", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::SliderFloat("Cube Scale", &context.cubeScale, 0.01f, 1.0f);
+        ImGui::SliderFloat("Scale", &context.cubeScale, 0.01f, 3.0f);
     }
 }
 
@@ -221,11 +320,11 @@ void drawRaylibUI(AppContext &context)
     DrawRectangleLines(screenWidth - wanted_size - 20, 20, wanted_size, wanted_size, GREEN);
 
     // draw positions on top of the heightmap
-    for (auto const &pos : context.objectPositions)
+    for (auto const &obj : context.objectPositions)
     {
         // Remap normalized coordinates [0..1] to the preview image in screen space.
-        float const px{preview_x + Clamp(pos.x, 0.0f, 1.0f) * preview_w};
-        float const py{preview_y + Clamp(pos.y, 0.0f, 1.0f) * preview_h};
+        float const px{preview_x + Clamp(obj.position.x, 0.0f, 1.0f) * preview_w};
+        float const py{preview_y + Clamp(obj.position.y, 0.0f, 1.0f) * preview_h};
 
         DrawCircleV({px, py}, 2.0f, RED);
     }

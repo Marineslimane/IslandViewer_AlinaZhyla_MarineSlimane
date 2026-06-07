@@ -161,6 +161,7 @@ void generateObjectsPositions(AppContext& context) {
 
     context.objectPositions.clear();
     context.objectPositions.reserve(positions.size());
+
     for (glm::vec2 const& p : positions)
     {
         // TODO(student): extension - filter positions by sampled height range.
@@ -168,18 +169,66 @@ void generateObjectsPositions(AppContext& context) {
 
         bool const isWater {h < 0.3f};
         bool const isMountain {h > 0.9f}; // > 0.5 is grass according to TransformImage
+        bool const isLow {h >= 0.3f && h <= 0.55f};
+        bool const isMidHigh {h > 0.55f && h <= 0.9f};
 
+        // type of 3D model to use depending on the height of the point
+        BiomeModel type {};
+        
         if (isWater || isMountain)
         {
             continue; // no point in water or at the top of mountains
         }
 
-        context.objectPositions.emplace_back(
-            p.x, // x
-            p.y, // y
-            // sample height from heightmap for each point (asuming positions are normalized in [0..1] range)
-            h // z
-        );
+        switch (context.currentBiome) // depending on the biome, objects are not the same
+        {
+            case Biome::Desert:
+                if (isLow)
+                {
+                    type = BiomeModel::PalmTree;
+                }
+                else
+                {
+                    type = BiomeModel::Rock;
+                }
+                break;
+            case Biome::Forest:
+                if (isLow)
+                {
+                    type = BiomeModel::ForestTree;
+                }
+                else
+                {
+                    type = BiomeModel::Rock;
+                }
+                break;
+            case Biome::CandyKingdom: // ADD MODELS
+                if (isLow)
+                {
+                    type = BiomeModel::Candy;
+                }
+                else
+                {
+                    type = BiomeModel::Cake;
+                }
+                break;
+            case Biome::SnowyMountain: // ADD MODELS
+                if (isLow)
+                {
+                    type = BiomeModel::Snowman;
+                }
+                else
+                {
+                    type = BiomeModel::House;
+                }
+                break;
+            default:
+                continue;
+        }
+
+        context.objectPositions.push_back(
+            {glm::vec3{p.x, p.y, h}, type }
+        ); // h = sample height from heightmap for each point (asuming positions are normalized in [0..1] range)
     }
 }
 
@@ -260,9 +309,4 @@ return Color{
     if (context.model.meshCount > 0) {
         context.model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = context.texture;
     }
-}
-
-void forestBiome(AppContext& context)
-{
-    // TODO
 }

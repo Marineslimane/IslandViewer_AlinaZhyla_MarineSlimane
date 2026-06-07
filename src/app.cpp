@@ -38,11 +38,14 @@ void unload(AppContext& context) {
     } 
     */
 
-    // others : 
-    if (context.objectModel.meshCount > 0) // if the model successfully loaded
+    // verifying model is loading correctly
+    for (auto &[biomeType, model] : context.objectModels)
     {
-        UnloadModel(context.objectModel);
-        context.objectModel = {};
+        if (model.meshCount > 0)
+        {
+            UnloadModel(model);
+            context.objectModels.clear();
+        }
     }
 }
 
